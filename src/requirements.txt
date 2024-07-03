@@ -1,0 +1,6 @@
+black
+selenium
+webdriver-manager
+requests
+Flask
+python-dotenv==0.21.0
