@@ -16,16 +16,19 @@ load_dotenv()
 USER = os.environ.get("USER_LOGIN")
 PASSW = os.environ.get("USER_PASSWORD")
 
+print(USER)
+print(PASSW)
+
 extensionId = "ilehaonighjijnmpnagapkhpcdbhclfg"
 CRX_URL = "https://clients2.google.com/service/update2/crx?response=redirect&prodversion=98.0.4758.102&acceptformat=crx2,crx3&x=id%3D~~~~%26uc&nacl_arch=x86-64"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36"
 
 ALLOW_DEBUG = True
 
-# are they set?
 if USER == "" or PASSW == "":
     print("Please set GRASS_USER and GRASS_PASS env variables")
     exit()
+
 
 if ALLOW_DEBUG == True:
     print(
@@ -33,7 +36,6 @@ if ALLOW_DEBUG == True:
     )
 
 
-# https://gist.github.com/ckuethe/fb6d972ecfc590c2f9b8
 def download_extension(extension_id):
     url = CRX_URL.replace("~~~~", extension_id)
     headers = {"User-Agent": USER_AGENT}
@@ -42,7 +44,6 @@ def download_extension(extension_id):
         for chunk in r.iter_content(chunk_size=128):
             fd.write(chunk)
     if ALLOW_DEBUG == True:
-        # generate md5 of file
         md5 = hashlib.md5(open("grass.crx", "rb").read()).hexdigest()
         print("Extension MD5: " + md5)
 
@@ -50,9 +51,7 @@ def download_extension(extension_id):
 def generate_error_report(driver):
     if ALLOW_DEBUG == False:
         return
-    # grab screenshot
     driver.save_screenshot("error.png")
-    # grab console logs
     logs = driver.get_log("browser")
     with open("error.log", "w") as f:
         for log in logs:
@@ -73,7 +72,6 @@ download_extension(extensionId)
 print("Downloaded! Installing extension and driver manager...")
 
 options = webdriver.ChromeOptions()
-# options.binary_location = '/usr/bin/chromium-browser'
 options.add_argument("--headless=new")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--no-sandbox")
@@ -93,7 +91,6 @@ except (WebDriverException, NoSuchDriverException) as e:
         print("Could not start with manual path! Exiting...")
         exit()
 
-# driver.get('chrome-extension://'+extensionId+'/index.html')
 print("Started! Logging in...")
 driver.get("https://app.getgrass.io/")
 
@@ -114,17 +111,13 @@ while True:
             driver.quit()
             exit()
 
-# find name="user"
 user = driver.find_element("xpath", '//*[@name="user"]')
 passw = driver.find_element("xpath", '//*[@name="password"]')
 submit = driver.find_element("xpath", '//*[@type="submit"]')
 
-# get user from env
 user.send_keys(USER)
 passw.send_keys(PASSW)
 submit.click()
-
-# id="chakra-toast-manager-top-right" is the toast
 
 
 sleep = 0
@@ -162,7 +155,6 @@ while True:
             exit()
 
 print("Connected! Starting API...")
-# flask api
 app = Flask(__name__)
 
 
@@ -188,9 +180,7 @@ def get():
         generate_error_report(driver)
 
     try:
-        # find all chakra-badge
         badges = driver.find_elements("xpath", '//*[contains(@class, "chakra-badge")]')
-        # find the one with chakra-text that contains either "Connected" or "Disconnected"
         connected = False
         for badge in badges:
             text = badge.find_element("xpath", "child::div//p").text

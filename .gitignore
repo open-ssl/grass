@@ -1,2 +1,4 @@
 .idea
-src.§
+src/.env
+src/grass.crx
+src/venv/
